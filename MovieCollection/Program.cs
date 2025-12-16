@@ -2,17 +2,17 @@
 using System.Reflection;
 using System;
 using System.Collections.Generic;
-public delegate void MovieAckDelegate(string message);
+public delegate void MovieAckDelegate(string message);//delegate is created.
 class Movie
 {
-    public Guid id { get; set; }
+    public Guid id { get; set; }//Properties are declared.
     public string title { get; set; }
     public string actor { get; set; }
     public string actress { get; set; }
     public string director { get; set; }
 
     public int year { get; set; }
-   public Movie(Guid id, string title, string actor, string actress, string director, int year)
+   public Movie(Guid id, string title, string actor, string actress, string director, int year)//Properties are initialized.
     {
         this.id = id;
         this.title = title;
@@ -25,10 +25,14 @@ class Movie
 
 class MovieCollection
 {
-    static string language { get; set; } = "telugu";
-   public Dictionary<Guid,Movie> MoviesCollections=new Dictionary<Guid,Movie>();
+   private string language { get; set; } 
+   public Dictionary<Guid,Movie> MoviesCollections=new Dictionary<Guid,Movie>();//MoviesCollections stores Guid and Movie object
     MovieManager movieManager1=new MovieManager();
-    MovieAckDelegate ack = new MovieAckDelegate(MovieManager.MovieAcknowledgement);
+    MovieAckDelegate ack = new MovieAckDelegate(MovieManager.MovieAcknowledgement);//Reference is given to Delegate
+   public MovieCollection(string language)
+    {
+        this.language=language; 
+    }
    public void AddMovie(Movie movie)
     {
         if (movie == null)
@@ -38,7 +42,7 @@ class MovieCollection
             throw new InvalidOperationException("Movie already exists");
 
         MoviesCollections.Add(movie.id, movie);
-        ack.Invoke($"Movie{movie.title} is added in Movie Collections with id {movie.id}");
+        ack.Invoke($"{language}: Movie {movie.title} is added in Movie Collections with id {movie.id}");//Delegate is invoked.
 
     }
 
@@ -56,18 +60,19 @@ class MovieCollection
         {
             throw new KeyNotFoundException("Movie not found");
         }
-        ack.Invoke($"Movie{title} is removed from Movie Collections");
+        ack.Invoke($"{language}: Movie {title} is removed from Movie Collections");
 
     }
 
    public void MovieCount()
     {
-        Console.WriteLine($"Total Movies: {MoviesCollections.Count}");
+        Console.WriteLine($"{language}: Total Movies: {MoviesCollections.Count}");
 
     }
     
     public void GetMovies(Dictionary<Guid,Movie> MoviesCollections)
     {
+        Console.WriteLine($"Language is {language}");
         foreach(var movie in MoviesCollections)
         {
             Console.WriteLine($"Movie id is {movie.Key} ");
@@ -82,18 +87,40 @@ class MovieCollection
 
 class MovieManager
 {
-    public static void MovieAcknowledgement(string message)
-    {
-        Console.WriteLine (message);
-
-    }
+   
     public static void Main()
     {
-        MovieManager movieManager = new MovieManager();
-        MovieCollection collection= new MovieCollection();
+       // MovieManager movieManager = new MovieManager();
+        MovieCollection currentCollection= null;
+        Dictionary<int,MovieCollection> language= new Dictionary<int,MovieCollection>();//Dictionary is created to store the language index and Object of specific language.
+       
         while (true)
         {
-        Console.WriteLine("-------Select the one option from below------");
+        Console.WriteLine("--------Select Language of the movie--------");
+        Console.WriteLine("1.Telugu");
+        Console.WriteLine("2.Hindi");
+        Console.WriteLine("3.English");
+        int selectedLanguage=int.Parse(Console.ReadLine());
+        if(!language.TryGetValue(selectedLanguage, out currentCollection))
+            {
+                string langName = selectedLanguage switch
+                {
+                    1 => "Telugu",
+                    2 => "Hindi",
+                    3 => "English",
+                    _ => "select correct option"
+
+
+                };
+                currentCollection = new MovieCollection(langName);
+                language[selectedLanguage] = currentCollection;
+                Console.WriteLine($"{langName} collection created.");
+            }
+        else
+            {
+                Console.WriteLine("Using existing Collection");
+            }
+                Console.WriteLine("-------Select the one option from below------");
         Console.WriteLine("1.Add Movie");
         Console.WriteLine("2.Remove Movie");
         Console.WriteLine("3.Count Movie Collections");
@@ -113,17 +140,17 @@ class MovieManager
                     Console.WriteLine("Enter year of released:");
                     int year = int.Parse(Console.ReadLine());
                     Movie movie = new Movie(Guid.NewGuid(), movieName, actor, actress, director, year);
-                    collection.AddMovie(movie);
+                    currentCollection.AddMovie(movie);
                     break;
                 case 2:
                     Guid id =  Guid.Parse(Console.ReadLine());
-                    collection.RemoveMovie(id);
+                    currentCollection.RemoveMovie(id);
                     break;
                 case 3:
-                    collection.MovieCount();
+                    currentCollection.MovieCount();
                     break;
                 case 4:
-                    collection.GetMovies(collection.MoviesCollections);
+                    currentCollection.GetMovies(currentCollection.MoviesCollections);
                     break;
                 case -1:
                     return;
@@ -133,6 +160,11 @@ class MovieManager
 
             }
         }
+
+    }
+    public static void MovieAcknowledgement(string message)
+    {
+        Console.WriteLine(message);
 
     }
 }
