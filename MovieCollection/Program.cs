@@ -5,7 +5,7 @@ using System.Collections.Generic;
 public delegate void MovieAckDelegate(string message);//delegate is created.
 class Movie
 {
-    public Guid id { get; set; }//Properties are declared.
+    public Guid id { get; set; }//Properties are declared.  Example for changes
     public string title { get; set; }
     public string actor { get; set; }
     public string actress { get; set; }
