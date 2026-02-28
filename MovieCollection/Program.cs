@@ -12,7 +12,7 @@ class Movie
     public string director { get; set; }
 
     public int year { get; set; }
-   public Movie(Guid id, string title, string actor, string actress, string director, int year)//Properties are initialized.
+   public Movie(Guid id, string title, string actor, string actress, string director, int year)//Properties are initialized. Test
     {
         this.id = id;
         this.title = title;
